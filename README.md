@@ -1,40 +1,35 @@
-# yonky
-
-  Yonky - Script Launcher
-
+===========================
+  Yonky v0.9.1 - Launcher
+===========================
 
 Yonky is a lightweight, local-first PowerShell script launcher with a simple GUI.
-It's designed to help IT technicians, AV pros, and small teams run predefined scripts easily.
+It helps IT technicians, AV pros, and small teams run their predefined PowerShell scripts
+through an easy, safe interface — no consoles, no typing, no nonsense.
 
-🐾 Named after a beloved black cat, Yoko (Yonky,Bonk,Bonky) is as "quiet" and efficient as she is.
+This is the official EXE release.
+🖤 Inspired by a very good black cat, Yoko.
 
--------------------------------------
-📦 What’s Included
--------------------------------------
-- Yonky_2.0.py        --> The main launcher application (Python script)
-- config.json         --> Script metadata (names, descriptions, etc.)
-- /scripts/           --> Place your .ps1 PowerShell scripts here
-- icon.ico            --> Icon for your shortcut (temporary)
+------------------------------
+📦 What’s in the ZIP
+------------------------------
+- Yonky.exe             --> The launcher (compiled EXE)
+- config.json           --> Optional script metadata
+- /scripts/             --> Place your PowerShell (.ps1) scripts here
+- README.txt            --> This file
 
--------------------------------------
-🧠 How to Use
--------------------------------------
-1. Make sure you have Python 3.9+ installed.
+------------------------------
+🚀 Getting Started
+------------------------------
+1. **Extract** the ZIP to a local folder (e.g. `C:\Yonky\`)
+2. **Double-click `Yonky.exe`** to launch the GUI
+3. Add your scripts to the `/scripts/` folder
+4. Edit `config.json` to set friendly names and descriptions
 
-2. Run Yonky using:
-   > pythonw Yonky_2.0.py,
-   > Placing the batch file on your desktop
+The launcher will auto-detect available `.ps1` files and display them with names, descriptions, and a “Run” button for each.
 
-
-3. Add your scripts into the /scripts/ folder.
-
-4. Edit config.json to give each script a friendly name and description.
-
-5. Launch scripts from the GUI with a click. Output will appear in the launcher window.
-
--------------------------------------
-⚙️ Example config.json entry
--------------------------------------
+------------------------------
+🧠 Example config.json
+------------------------------
 {
   "Cleanup.ps1": {
     "name": "Clean Temp Folders",
@@ -42,22 +37,33 @@ It's designed to help IT technicians, AV pros, and small teams run predefined sc
   }
 }
 
--------------------------------------
-🛠 Tips
--------------------------------------
-- Use "pythonw" instead of "python" to suppress the black console window.
-- Scripts will run in separate threads to keep the GUI responsive.
-- Log output and error handling improvements are in development!
+This file is optional. If it's missing, Yonky will simply list scripts by filename.
 
--------------------------------------
+------------------------------
+🔧 Features (v0.9.1)
+------------------------------
+✔️ Simple GUI to run scripts  
+✔️ Real-time script output display  
+✔️ config.json for custom labels  
+✔️ Auto-detect scripts from `scripts/` folder  
+✔️ Portable EXE — no install required  
+
+------------------------------
 📌 Notes
+------------------------------
+- Scripts run using PowerShell silently under the hood.
+- You can update scripts/config without restarting the app (click “Refresh”).
+- This is an early release — more features coming!
+
+------------------------------
+📫 Feedback & Source Code
+------------------------------
+GitHub: https://github.com/viik2k/yonky  
+Latest Release: https://github.com/viik2k/yonky/releases  
+
+Please report bugs, request features, or contribute via GitHub Issues.
+
+Built with love, PowerShell, and a black cat named Yoko.
+
 -------------------------------------
-Yonky is in active development. Expect features like favorites, history, and remote config in future versions. Please feel free to contribute to this!
-
-Built with love, PowerShell, and a little cat magic.
-
--------------------------------------
-
-
-
 ![image](https://github.com/user-attachments/assets/125dba38-2675-4bc1-89dc-f9ed5f1a70b9)
