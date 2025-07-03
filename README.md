@@ -22,7 +22,8 @@ It's designed to help IT technicians, AV pros, and small teams run predefined sc
 
 2. Run Yonky using:
    > pythonw Yonky_2.0.py
-   (Or just double-click if you've compiled to an EXE)
+   > placing the batch file on your desktop
+
 
 3. Add your scripts into the /scripts/ folder.
 
