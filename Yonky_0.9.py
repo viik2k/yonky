@@ -10,6 +10,8 @@ from datetime import datetime
 SCRIPTS_DIR = os.path.join(os.path.dirname(__file__), "scripts")
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
 
+MAX_RECENT = 10
+
 class ScriptLauncherApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -23,9 +25,10 @@ class ScriptLauncherApp(tk.Tk):
         # Apply theme
         self.style = ttk.Style()
         self.style.theme_use('clam')
-        
+
         self.setup_menu()
         self.setup_ui()
+        self.refresh_recent_dropdown()
         self.load_scripts()
         
         # Bind close event
@@ -62,13 +65,24 @@ class ScriptLauncherApp(tk.Tk):
         header_frame = ttk.Frame(self)
         header_frame.pack(fill=tk.X, padx=10, pady=5)
         
-        ttk.Label(header_frame, text="Yonky - Built with Powershell, and a little cat magic", 
+        ttk.Label(header_frame, text="Yonky - Built with Powershell, and a little cat magic",
                  font=("Segoe UI", 16, "bold")).pack(side=tk.LEFT)
-        
+
         # Status label
-        self.status_label = ttk.Label(header_frame, text="Ready", 
+        self.status_label = ttk.Label(header_frame, text="Ready",
                                      font=("Segoe UI", 9))
         self.status_label.pack(side=tk.RIGHT)
+
+        ttk.Label(header_frame, text="Recent:").pack(side=tk.RIGHT, padx=(0, 5))
+        self.recent_var = tk.StringVar()
+        self.recent_dropdown = ttk.Combobox(
+            header_frame,
+            textvariable=self.recent_var,
+            state="readonly",
+            width=25
+        )
+        self.recent_dropdown.pack(side=tk.RIGHT, padx=(0, 10))
+        self.recent_dropdown.bind("<<ComboboxSelected>>", self.on_recent_selected)
 
         # Main container with paned window
         main_paned = ttk.PanedWindow(self, orient=tk.VERTICAL)
@@ -197,6 +211,28 @@ class ScriptLauncherApp(tk.Tk):
         
         if self.config_data.get("auto_scroll", True):
             self.output_box.see(tk.END)
+
+    def refresh_recent_dropdown(self):
+        """Refresh the recent scripts dropdown"""
+        names = [entry.get("name") for entry in self.config_data.get("recent_scripts", [])]
+        self.recent_dropdown['values'] = names
+
+    def on_recent_selected(self, event):
+        """Run script selected from recent dropdown"""
+        script = self.recent_var.get()
+        if script:
+            self.run_script_thread(script)
+
+    def update_recent_scripts(self, script_name):
+        """Update recent scripts list"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        entry = {"name": script_name, "timestamp": timestamp}
+        recent = self.config_data.get("recent_scripts", [])
+        recent = [e for e in recent if e.get("name") != script_name]
+        recent.insert(0, entry)
+        self.config_data["recent_scripts"] = recent[:MAX_RECENT]
+        self.save_config()
+        self.refresh_recent_dropdown()
 
     def add_script(self):
         """Add a new script from file system"""
@@ -356,6 +392,7 @@ class ScriptLauncherApp(tk.Tk):
                 self.log_output(f"Exit code: {result.returncode}", "error")
             else:
                 self.log_output("Script completed successfully", "success")
+                self.update_recent_scripts(script_name)
 
         except subprocess.TimeoutExpired:
             self.log_output(f"Script '{script_name}' timed out after 5 minutes", "error")
