@@ -1,6 +1,6 @@
-===========================
+
   Yonky v0.9.1 - Launcher
-===========================
+
 
 Yonky is a lightweight, local-first PowerShell script launcher with a simple GUI.
 It helps IT technicians, AV pros, and small teams run their predefined PowerShell scripts
