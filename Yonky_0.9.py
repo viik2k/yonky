@@ -337,28 +337,72 @@ class ScriptLauncherApp(tk.Tk):
             else:
                 raise ValueError(f"Unsupported script type: {script_name}")
 
+
             start_time = time.time()
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)  # 5 minute timeout
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+
+            def stream_reader(stream, tag, prefix):
+                first = True
+                for line in iter(stream.readline, ""):
+                    if not line:
+                        break
+                    if first:
+                        self.log_output(prefix, "info" if tag == "" else "error")
+                        first = False
+                    self.log_output(line.rstrip(), tag)
+
+            stdout_thread = threading.Thread(
+                target=stream_reader,
+                args=(process.stdout, "", "STDOUT:"),
+                daemon=True,
+            )
+            stderr_thread = threading.Thread(
+                target=stream_reader,
+                args=(process.stderr, "error", "STDERR:"),
+                daemon=True,
+            )
+
+            stdout_thread.start()
+            stderr_thread.start()
+
+            timed_out = False
+            try:
+                process.wait(timeout=300)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                timed_out = True
+
             end_time = time.time()
+            stdout_thread.join()
+            stderr_thread.join()
 
             self.log_output(f"=== Executed: {script_name} ===", "info")
-            self.log_output(f"Duration: {end_time - start_time:.2f} seconds", "info")
-            
-            if result.stdout.strip():
-                self.log_output("STDOUT:", "info")
-                self.log_output(result.stdout.strip())
-            
-            if result.stderr.strip():
-                self.log_output("STDERR:", "error")
-                self.log_output(result.stderr.strip(), "error")
-            
-            if result.returncode != 0:
-                self.log_output(f"Exit code: {result.returncode}", "error")
-            else:
-                self.log_output("Script completed successfully", "success")
+            self.log_output(
+                f"Duration: {end_time - start_time:.2f} seconds",
+                "info",
+            )
 
-        except subprocess.TimeoutExpired:
-            self.log_output(f"Script '{script_name}' timed out after 5 minutes", "error")
+            if timed_out:
+                self.log_output(
+                    f"Script '{script_name}' timed out after 5 minutes",
+                    "error",
+                )
+            else:
+                if process.returncode != 0:
+                    self.log_output(
+                        f"Exit code: {process.returncode}",
+                        "error",
+                    )
+                else:
+                    self.log_output(
+                        "Script completed successfully",
+                        "success",
+                    )
         except Exception as e:
             self.log_output(f"Exception running '{script_name}': {e}", "error")
 
