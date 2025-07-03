@@ -14,7 +14,7 @@ It's designed to help IT technicians, AV pros, and small teams run predefined sc
 - Yonky_2.0.py        --> The main launcher application (Python script)
 - config.json         --> Script metadata (names, descriptions, etc.)
 - /scripts/           --> Place your .ps1 PowerShell scripts here
-- icon.ico            --> Icon for the Batch file (Temporary until its packed into a exe)
+- icon.ico            --> Icon for your shortcut (temporary)
 
 -------------------------------------
 🧠 How to Use
@@ -55,3 +55,9 @@ It's designed to help IT technicians, AV pros, and small teams run predefined sc
 Yonky is in active development. Expect features like favorites, history, and remote config in future versions. Please feel free to contribute to this!
 
 Built with love, PowerShell, and a little cat magic.
+
+-------------------------------------
+
+
+
+![image](https://github.com/user-attachments/assets/125dba38-2675-4bc1-89dc-f9ed5f1a70b9)
