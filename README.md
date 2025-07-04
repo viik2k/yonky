@@ -40,7 +40,12 @@ The launcher will auto-detect available `.ps1` files and display them with names
 This file is optional. If it's missing, Yonky will simply list scripts by filename.
 
 ------------------------------
+
 🛠 Using the Launcher
+=======
+🛠 Features (v0.9.1.1)
+
+
 ------------------------------
 - **Add Script**: `File > Add Script...` copies an existing file into the `scripts` folder.
 - **New Script**: `File > New Script...` creates a blank `.ps1` ready for editing.
