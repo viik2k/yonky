@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, scrolledtext, simpledialog
@@ -7,8 +8,13 @@ import json
 import time
 from datetime import datetime
 
-SCRIPTS_DIR = os.path.join(os.path.dirname(__file__), "scripts")
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
+if getattr(sys, "frozen", False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
+CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
 
 class PreferencesDialog(tk.Toplevel):
