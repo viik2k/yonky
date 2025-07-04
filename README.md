@@ -1,5 +1,5 @@
 
-  Yonky v0.9.2 - Launcher
+  Yonky v0.9.1.1 - Launcher
 
 
 Yonky is a lightweight, local-first PowerShell script launcher with a simple GUI.
@@ -53,24 +53,6 @@ This file is optional. If it's missing, Yonky will simply list scripts by filena
 - **Preferences**: Open `Edit > Preferences` to see the upcoming settings dialog (edit `config.json` to change options).
 - **Tools**: Open the scripts folder or launch PowerShell from the `Tools` menu.
 
-------------------------------
-🔧 Features (v0.9.2)
-------------------------------
-✔️ Simple GUI to run PowerShell or batch scripts
-✔️ Real-time output with optional timestamps
-✔️ Add, create, edit, and delete scripts from the launcher
-✔️ config.json for names, descriptions, and settings
-✔️ Tools menu to open the scripts folder or a PowerShell console
-✔️ Portable EXE — no install required
-
-------------------------------
-🆕 What's New in 0.9.2
-------------------------------
-- Preferences dialog accessible from **Edit > Preferences** (placeholder for upcoming options)
-- Config expanded with `recent_scripts`, `auto_scroll`, `show_timestamps` and `execution_policy`
-- Create, edit and delete scripts directly from the launcher
-- Tools menu added to open the scripts folder or launch PowerShell
-- Support for `.bat` and `.cmd` scripts
 
 ------------------------------
 📌 Notes
