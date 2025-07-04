@@ -10,6 +10,45 @@ from datetime import datetime
 SCRIPTS_DIR = os.path.join(os.path.dirname(__file__), "scripts")
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
 
+
+class PreferencesDialog(tk.Toplevel):
+    """Dialog for editing user preferences"""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.title("Preferences")
+        self.resizable(False, False)
+
+        # Variables bound to configuration options
+        self.auto_scroll_var = tk.BooleanVar(value=parent.config_data.get("auto_scroll", True))
+        self.timestamps_var = tk.BooleanVar(value=parent.config_data.get("show_timestamps", True))
+        self.exec_policy_var = tk.StringVar(value=parent.config_data.get("execution_policy", "Bypass"))
+
+        # Build UI
+        ttk.Checkbutton(self, text="Auto-scroll output", variable=self.auto_scroll_var).pack(anchor="w", padx=10, pady=5)
+        ttk.Checkbutton(self, text="Show timestamps", variable=self.timestamps_var).pack(anchor="w", padx=10, pady=5)
+
+        exec_frame = ttk.Frame(self)
+        exec_frame.pack(fill="x", padx=10, pady=5)
+        ttk.Label(exec_frame, text="Execution Policy:").pack(side="left")
+        ttk.Entry(exec_frame, textvariable=self.exec_policy_var, width=20).pack(side="left", padx=(5, 0))
+
+        button_frame = ttk.Frame(self)
+        button_frame.pack(fill="x", pady=10)
+        ttk.Button(button_frame, text="OK", command=self.on_ok).pack(side="right", padx=5)
+        ttk.Button(button_frame, text="Cancel", command=self.destroy).pack(side="right")
+
+        self.protocol("WM_DELETE_WINDOW", self.on_ok)
+
+    def on_ok(self):
+        """Save settings and close"""
+        self.parent.config_data["auto_scroll"] = self.auto_scroll_var.get()
+        self.parent.config_data["show_timestamps"] = self.timestamps_var.get()
+        self.parent.config_data["execution_policy"] = self.exec_policy_var.get()
+        self.parent.save_config()
+        self.destroy()
+
 class ScriptLauncherApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -402,7 +441,7 @@ class ScriptLauncherApp(tk.Tk):
 
     def show_preferences(self):
         """Show preferences dialog"""
-        messagebox.showinfo("Preferences", "Preferences dialog coming soon!")
+        PreferencesDialog(self)
 
     def show_about(self):
         """Show about dialog"""
