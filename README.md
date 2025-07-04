@@ -1,5 +1,5 @@
 
-  Yonky v0.9.1 - Launcher
+  Yonky v0.9.2 - Launcher
 
 
 Yonky is a lightweight, local-first PowerShell script launcher with a simple GUI.
@@ -40,7 +40,7 @@ The launcher will auto-detect available `.ps1` files and display them with names
 This file is optional. If it's missing, Yonky will simply list scripts by filename.
 
 ------------------------------
-🔧 Features (v0.9.1)
+🔧 Features (v0.9.2)
 ------------------------------
 ✔️ Simple GUI to run scripts  
 ✔️ Real-time script output display  

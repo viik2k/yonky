@@ -408,7 +408,7 @@ class ScriptLauncherApp(tk.Tk):
         """Show about dialog"""
         messagebox.showinfo("About", 
                            "Yonky - PowerShell Script Launcher\n"
-                           "Version 2.0\n"
+                           "Version 0.9.2\n"
                            "Enhanced script management and execution\n"
                            "Created By Finn Henderson\n"
                            "Current Version. 07/2025")
