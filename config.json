@@ -3,10 +3,6 @@
   "auto_scroll": true,
   "show_timestamps": true,
   "execution_policy": "Bypass",
- codex/implement-script-loading-and-persistence
-  "scripts": {}
-}
-
   "scripts": {
     "check-cpu.ps1": {
       "name": "check-cpu.ps1",
@@ -18,4 +14,3 @@
     }
   }
 }
-main
