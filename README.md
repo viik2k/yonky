@@ -13,7 +13,7 @@ This is the official EXE release.
 📦 What’s in the ZIP
 ------------------------------
 - Yonky.exe             --> The launcher (compiled EXE)
-- config.json           --> Optional script metadata
+ - config.json           --> Optional launcher settings & script metadata
 - /scripts/             --> Place your PowerShell (.ps1) scripts here
 - README.txt            --> This file
 
@@ -23,7 +23,7 @@ This is the official EXE release.
 1. **Extract** the ZIP to a local folder (e.g. `C:\Yonky\`)
 2. **Double-click `Yonky.exe`** to launch the GUI
 3. Add your scripts to the `/scripts/` folder
-4. Edit `config.json` to set friendly names and descriptions
+4. Edit `config.json` to set friendly names and descriptions under the `scripts` section
 
 The launcher will auto-detect available `.ps1` files and display them with names, descriptions, and a “Run” button for each.
 
@@ -31,13 +31,16 @@ The launcher will auto-detect available `.ps1` files and display them with names
 🧠 Example config.json
 ------------------------------
 {
-  "Cleanup.ps1": {
-    "name": "Clean Temp Folders",
-    "description": "Deletes temp files older than 7 days."
+  "scripts": {
+    "Cleanup.ps1": {
+      "name": "Clean Temp Folders",
+      "description": "Deletes temp files older than 7 days."
+    }
   }
 }
 
-This file is optional. If it's missing, Yonky will simply list scripts by filename.
+This file is optional. If it's missing, Yonky scans the `scripts` folder and
+generates entries automatically using each filename.
 
 ------------------------------
 
