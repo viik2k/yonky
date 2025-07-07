@@ -71,35 +71,119 @@ class ScriptLauncherApp(tk.Tk):
         
         self.setup_menu()
         self.setup_ui()
+        self.load_scripts_from_config()
         self.load_scripts()
         
         # Bind close event
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def load_config(self):
-        """Load application configuration"""
+        """Load application configuration and auto-detect scripts"""
         default_config = {
             "recent_scripts": [],
             "auto_scroll": True,
             "show_timestamps": True,
-            "execution_policy": "Bypass"
+            "execution_policy": "Bypass",
+            "scripts": {}
         }
-        
+
+ codex/modify-load_config-to-check-for-config.json-existence
+        def scan_scripts():
+            """Return a dict of available scripts with default metadata"""
+            if not os.path.isdir(SCRIPTS_DIR):
+                return {}
+            files = [f for f in os.listdir(SCRIPTS_DIR)
+                     if f.endswith((".ps1", ".bat", ".cmd"))]
+            return {f: {"name": f, "description": ""} for f in files}
+
+        config = default_config.copy()
+        config_changed = False
+
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, 'r') as f:
-                    return {**default_config, **json.load(f)}
-            except:
-                return default_config
-        return default_config
+                    loaded = json.load(f)
+                    if isinstance(loaded, dict):
+                        config.update(loaded)
+            except Exception:
+                config_changed = True
+        else:
+            config_changed = True
+
+        if "scripts" not in config or not isinstance(config["scripts"], dict):
+            config["scripts"] = {}
+            config_changed = True
+
+        for name, meta in scan_scripts().items():
+            if name not in config["scripts"]:
+                config["scripts"][name] = meta
+                config_changed = True
+
+        self.config_data = config
+        if config_changed:
+            self.save_config()
+
+        data = {}
+        if os.path.exists(CONFIG_FILE):
+            try:
+                with open(CONFIG_FILE, 'r') as f:
+                    data = json.load(f)
+            except Exception:
+                data = {}
+
+        config = {**default_config, **data}
+
+        if not config.get("scripts"):
+            scripts = {}
+            if os.path.exists(SCRIPTS_DIR):
+                for f in os.listdir(SCRIPTS_DIR):
+                    if f.endswith((".ps1", ".bat", ".cmd")):
+                        scripts[f] = {"name": f, "description": ""}
+            config["scripts"] = scripts
+
+ main
+        return config
 
     def save_config(self):
         """Save application configuration"""
         try:
+            scripts_meta = self.config_data.get("scripts", {})
+
+            if os.path.exists(SCRIPTS_DIR):
+                files = [f for f in os.listdir(SCRIPTS_DIR)
+                         if f.endswith((".ps1", ".bat", ".cmd"))]
+
+                for f in files:
+                    if f not in scripts_meta:
+                        scripts_meta[f] = {"name": f, "description": ""}
+
+                for key in list(scripts_meta.keys()):
+                    if key not in files:
+                        del scripts_meta[key]
+
+            self.config_data["scripts"] = scripts_meta
+
             with open(CONFIG_FILE, 'w') as f:
                 json.dump(self.config_data, f, indent=2)
         except Exception as e:
             print(f"Could not save config: {e}")
+
+    def load_scripts_from_config(self):
+        """Return scripts defined in the configuration file"""
+        scripts_cfg = self.config_data.get("scripts", {})
+        parsed = {}
+        for filename, meta in scripts_cfg.items():
+            if isinstance(meta, dict):
+                parsed[filename] = {
+                    "name": meta.get("name", os.path.splitext(filename)[0]),
+                    "description": meta.get("description", ""),
+                }
+            else:
+                parsed[filename] = {
+                    "name": str(meta),
+                    "description": "",
+                }
+        return parsed
 
     def setup_ui(self):
         """Setup the user interface"""
@@ -258,7 +342,13 @@ class ScriptLauncherApp(tk.Tk):
             try:
                 with open(file_path, 'rb') as src, open(dest_path, 'wb') as dst:
                     dst.write(src.read())
-                self.log_output(f"Added script: {os.path.basename(file_path)}", "success")
+                script_name = os.path.basename(file_path)
+                self.config_data.setdefault("scripts", {})[script_name] = {
+                    "name": os.path.splitext(script_name)[0],
+                    "description": "",
+                }
+                self.save_config()
+                self.log_output(f"Added script: {script_name}", "success")
                 self.load_scripts()
             except Exception as e:
                 messagebox.showerror("Error", f"Could not add script: {e}")
@@ -277,6 +367,11 @@ class ScriptLauncherApp(tk.Tk):
                         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         script_name
                     ))
+                self.config_data.setdefault("scripts", {})[script_name] = {
+                    "name": os.path.splitext(script_name)[0],
+                    "description": "",
+                }
+                self.save_config()
                 self.log_output(f"Created new script: {script_name}", "success")
                 self.load_scripts()
                 self.edit_script(script_name)
@@ -295,7 +390,7 @@ class ScriptLauncherApp(tk.Tk):
         """Edit the currently selected script"""
         selection = self.script_tree.selection()
         if selection:
-            script_name = self.script_tree.item(selection[0])['values'][0]
+            script_name = selection[0]
             self.edit_script(script_name)
 
     def clear_output(self):
@@ -313,32 +408,94 @@ class ScriptLauncherApp(tk.Tk):
         except Exception as e:
             self.log_output(f"Could not copy output: {e}", "error")
 
-    def load_scripts(self):
-        """Load and display available scripts"""
-        # Clear existing items
+    def load_scripts_from_config(self):
+        """Populate the tree view from stored config"""
         for item in self.script_tree.get_children():
             self.script_tree.delete(item)
+ codex/implement-script-loading-and-persistence
         
-        if not os.path.exists(SCRIPTS_DIR):
-            return
-            
         try:
-            scripts = [f for f in os.listdir(SCRIPTS_DIR) 
-                      if f.endswith(('.ps1', '.bat', '.cmd'))]
-            
-            for script in sorted(scripts):
+            config_scripts = self.load_scripts_from_config()
+
+            detected = []
+            if os.path.exists(SCRIPTS_DIR):
+                detected = [
+                    f for f in os.listdir(SCRIPTS_DIR)
+                    if f.endswith((".ps1", ".bat", ".cmd"))
+                ]
+
+            all_scripts = set(detected) | set(config_scripts.keys())
+
+            for script in detected:
+                if script not in config_scripts:
+                    self.config_data.setdefault("scripts", {})[script] = {
+                        "name": os.path.splitext(script)[0],
+                        "description": "",
+                    }
+            self.save_config()
+
+            for script in sorted(all_scripts):
                 script_path = os.path.join(SCRIPTS_DIR, script)
                 try:
-                    stat = os.stat(script_path)
-                    modified = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M")
-                    size = f"{stat.st_size / 1024:.1f}"
-                    
-                    self.script_tree.insert('', tk.END, values=(script, modified, size))
-                except Exception as e:
-                    self.script_tree.insert('', tk.END, values=(script, "Error", "0"))
-            
-            self.status_label.config(text=f"{len(scripts)} scripts loaded")
-            
+                    if os.path.exists(script_path):
+                        stat = os.stat(script_path)
+                        modified = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M")
+                        size = f"{stat.st_size / 1024:.1f}"
+                    else:
+                        modified = "N/A"
+                        size = "0"
+
+                    self.script_tree.insert("", tk.END, iid=script, values=(script, modified, size))
+                except Exception:
+                    self.script_tree.insert("", tk.END, iid=script, values=(script, "Error", "0"))
+
+            self.status_label.config(text=f"{len(all_scripts)} scripts loaded")
+
+
+        scripts = self.config_data.get("scripts", {})
+        count = 0
+        for fname, meta in scripts.items():
+            script_path = os.path.join(SCRIPTS_DIR, fname)
+            if not os.path.exists(script_path):
+                continue
+            try:
+                stat = os.stat(script_path)
+                modified = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M")
+                size = f"{stat.st_size / 1024:.1f}"
+            except Exception:
+                modified = "Error"
+                size = "0"
+
+            display_name = meta.get("name", fname)
+            self.script_tree.insert('', tk.END, iid=fname, values=(display_name, modified, size))
+            count += 1
+
+        self.status_label.config(text=f"{count} scripts loaded")
+
+    def load_scripts(self):
+        """Synchronize config with filesystem and refresh view"""
+        if not os.path.exists(SCRIPTS_DIR):
+            return
+
+        scripts_meta = self.config_data.get("scripts", {})
+
+        try:
+            files = [f for f in os.listdir(SCRIPTS_DIR)
+                     if f.endswith((".ps1", ".bat", ".cmd"))]
+
+            for f in files:
+                if f not in scripts_meta:
+                    scripts_meta[f] = {"name": f, "description": ""}
+
+            for key in list(scripts_meta.keys()):
+                if key not in files:
+                    del scripts_meta[key]
+
+            self.config_data["scripts"] = scripts_meta
+            self.save_config()
+            self.load_scripts_from_config()
+ main
+
         except Exception as e:
             self.log_output(f"Error loading scripts: {e}", "error")
 
@@ -348,8 +505,8 @@ class ScriptLauncherApp(tk.Tk):
         if not selection:
             messagebox.showwarning("No Selection", "Please select a script to run")
             return
-        
-        script_name = self.script_tree.item(selection[0])['values'][0]
+
+        script_name = selection[0]
         self.run_script_thread(script_name)
 
     def delete_selected_script(self):
@@ -358,8 +515,8 @@ class ScriptLauncherApp(tk.Tk):
         if not selection:
             messagebox.showwarning("No Selection", "Please select a script to delete")
             return
-        
-        script_name = self.script_tree.item(selection[0])['values'][0]
+
+        script_name = selection[0]
         self.delete_script(script_name)
 
     def run_script_thread(self, script_name):
@@ -460,6 +617,8 @@ class ScriptLauncherApp(tk.Tk):
         if confirm:
             try:
                 os.remove(os.path.join(SCRIPTS_DIR, script_name))
+                self.config_data.get("scripts", {}).pop(script_name, None)
+                self.save_config()
                 self.load_scripts()
                 self.log_output(f"Deleted script: {script_name}", "success")
             except Exception as e:

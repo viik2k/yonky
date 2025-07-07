@@ -13,7 +13,11 @@ This is the official EXE release.
 📦 What’s in the ZIP
 ------------------------------
 - Yonky.exe             --> The launcher (compiled EXE)
+ codex/update-readme.md-and-readme.txt
 - config.json           --> Automatically created settings file
+
+ - config.json           --> Optional launcher settings & script metadata
+main
 - /scripts/             --> Place your PowerShell (.ps1) scripts here
 - README.txt            --> This file
 
@@ -22,8 +26,13 @@ This is the official EXE release.
 ------------------------------
 1. **Extract** the ZIP to a local folder (e.g. `C:\Yonky\`)
 2. **Double-click `Yonky.exe`** to launch the GUI
+ codex/update-readme.md-and-readme.txt
 3. Place your PowerShell or batch scripts in the `/scripts/` folder
 4. `config.json` will be created or updated automatically when Yonky starts
+
+3. Add your scripts to the `/scripts/` folder
+4. Edit `config.json` to set friendly names and descriptions under the `scripts` section
+ main
 
 Scripts in the `scripts` folder are detected automatically when you start Yonky or press **Refresh**.
 
@@ -31,6 +40,7 @@ Scripts in the `scripts` folder are detected automatically when you start Yonky 
 🧠 Example `config.json`
 ------------------------------
 {
+ codex/update-readme.md-and-readme.txt
   "recent_scripts": [],
   "auto_scroll": true,
   "show_timestamps": true,
@@ -46,6 +56,18 @@ Yonky updates this file to remember your preferences between runs.
 * **Manual addition** – Use `File > Add Script...` to copy an existing script into the folder.
 * **Persistence** – Scripts stay listed as long as their files remain in `scripts/`; Yonky also records recent runs in `config.json`.
 
+
+  "scripts": {
+    "Cleanup.ps1": {
+      "name": "Clean Temp Folders",
+      "description": "Deletes temp files older than 7 days."
+    }
+  }
+}
+
+This file is optional. If it's missing, Yonky scans the `scripts` folder and
+generates entries automatically using each filename.
+ main
 
 ------------------------------
 
