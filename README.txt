@@ -1,5 +1,5 @@
 ===========================
-  Yonky v0.9.1.1 - Launcher
+  Yonky v0.9.2 - Launcher
 ===========================
 
 Yonky is a lightweight, local-first PowerShell script launcher with a simple GUI.
@@ -13,7 +13,7 @@ This is the official EXE release.
 📦 What’s in the ZIP
 ------------------------------
 - Yonky.exe             --> The launcher (compiled EXE)
-- config.json           --> Optional script metadata
+- config.json           --> Automatically created settings file
 - /scripts/             --> Place your PowerShell (.ps1) scripts here
 - README.txt            --> This file
 
@@ -22,35 +22,43 @@ This is the official EXE release.
 ------------------------------
 1. **Extract** the ZIP to a local folder (e.g. `C:\Yonky\`)
 2. **Double-click `Yonky.exe`** to launch the GUI
-3. Add your scripts to the `/scripts/` folder
-4. Edit `config.json` to set friendly names and descriptions
+3. Place your PowerShell or batch scripts in the `/scripts/` folder
+4. `config.json` will be created or updated automatically when Yonky starts
 
-The launcher will auto-detect available `.ps1` files and display them with names, descriptions, and a “Run” button for each.
+Scripts in the `scripts` folder are detected automatically when you start Yonky or press **Refresh**.
 
 ------------------------------
-🧠 Example config.json
+🧠 Example `config.json`
 ------------------------------
 {
-  "Cleanup.ps1": {
-    "name": "Clean Temp Folders",
-    "description": "Deletes temp files older than 7 days."
-  }
+  "recent_scripts": [],
+  "auto_scroll": true,
+  "show_timestamps": true,
+  "execution_policy": "Bypass"
 }
 
-This file is optional. If it's missing, Yonky will simply list scripts by filename.
+Yonky updates this file to remember your preferences between runs.
+
+------------------------------
+📃 Working with Scripts
+------------------------------
+* **Automatic detection** – Any `.ps1`, `.bat` or `.cmd` file placed in the `scripts` folder shows up when you start Yonky or click **Refresh**.
+* **Manual addition** – Use `File > Add Script...` to copy an existing script into the folder.
+* **Persistence** – Scripts stay listed as long as their files remain in `scripts/`; Yonky also records recent runs in `config.json`.
+
 
 ------------------------------
 
 🛠 Using the Launcher
 =======
-🛠 Features (v0.9.1.1)
+🛠 Features (v0.9.2)
 
 
 ------------------------------
 - **Add Script**: `File > Add Script...` copies an existing file into the `scripts` folder.
 - **New Script**: `File > New Script...` creates a blank `.ps1` ready for editing.
 - **Edit/Delete**: Select a script and use the `Edit Script` or `Delete Selected` buttons.
-- **Preferences**: Open `Edit > Preferences` to see the upcoming settings dialog (edit `config.json` to change options).
+- **Preferences**: Open `Edit > Preferences` to change options saved in `config.json`.
 - **Tools**: Open the scripts folder or launch PowerShell from the `Tools` menu.
 
 
