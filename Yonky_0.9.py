@@ -77,21 +77,50 @@ class ScriptLauncherApp(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def load_config(self):
-        """Load application configuration"""
+        """Load application configuration and auto-detect scripts"""
         default_config = {
             "recent_scripts": [],
             "auto_scroll": True,
             "show_timestamps": True,
-            "execution_policy": "Bypass"
+            "execution_policy": "Bypass",
+            "scripts": {}
         }
-        
+
+        def scan_scripts():
+            """Return a dict of available scripts with default metadata"""
+            if not os.path.isdir(SCRIPTS_DIR):
+                return {}
+            files = [f for f in os.listdir(SCRIPTS_DIR)
+                     if f.endswith((".ps1", ".bat", ".cmd"))]
+            return {f: {"name": f, "description": ""} for f in files}
+
+        config = default_config.copy()
+        config_changed = False
+
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, 'r') as f:
-                    return {**default_config, **json.load(f)}
-            except:
-                return default_config
-        return default_config
+                    loaded = json.load(f)
+                    if isinstance(loaded, dict):
+                        config.update(loaded)
+            except Exception:
+                config_changed = True
+        else:
+            config_changed = True
+
+        if "scripts" not in config or not isinstance(config["scripts"], dict):
+            config["scripts"] = {}
+            config_changed = True
+
+        for name, meta in scan_scripts().items():
+            if name not in config["scripts"]:
+                config["scripts"][name] = meta
+                config_changed = True
+
+        self.config_data = config
+        if config_changed:
+            self.save_config()
+        return config
 
     def save_config(self):
         """Save application configuration"""
